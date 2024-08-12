@@ -1,7 +1,7 @@
-# Develope step
+# Development step
 FROM node:18-alpine as development
 
-WORKDIR /usr/app
+WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
@@ -21,9 +21,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
-COPY --from=development /usr/app/dist ./dist
-
-RUN ls -l ./dist
+COPY --from=development /app/dist ./dist
 
 EXPOSE 3000
 
