@@ -13,7 +13,15 @@ interface ChannelType {
   clients: WebSocket[]
 }
 
+let clients: ClientType[] = []
+
+const channels: ChannelType[] = []
+
+const pingInterval = 10000 // 10seg
+
 const port = parseInt(process.env.PORT || '3000', 10)
+
+
 
 const server = http.createServer((req, res) => {
 
@@ -25,22 +33,13 @@ const server = http.createServer((req, res) => {
 const websocket = new WebSocket.Server({ server, clientTracking: true });
 
 
-
-
-
-
-let clients: ClientType[] = []
-const channels: ChannelType[] = []
-
-const pingInterval = 10000 // 10seg
-
 websocket.on('connection', (socket, req)=> {
 
   addNewClient(socket, req)
 
   socket.on('error', console.error)
 
-  socket.on('close', () => handleClose)
+  socket.on('close', () => handleClose(socket, req))
 
   socket.on('message', (data) => handleMessage(socket, req, data))
 
@@ -157,9 +156,9 @@ function joinOrLeaveChannel(socket: WebSocket, req: http.IncomingMessage, data: 
 }
 
 /// HANDLE CLOSE
-function handleClose(socket: WebSocket, code: number, reason: Buffer) {
+function handleClose(socket: WebSocket, req: http.IncomingMessage) {
 
-  clients = clients.filter((c)=> c.client !== socket)
+  clients = clients.filter((c)=> c.client != socket)
 
 }
 
