@@ -1,9 +1,7 @@
 import http from 'http'
-import { parse } from 'url'
-import { WebSocketServer } from 'ws';
+import net from 'net'
 import WebSocket from 'ws';
 import crypto from 'crypto'
-import internal from 'stream';
 
 interface ClientType { 
   key: any, 
@@ -16,8 +14,6 @@ interface ChannelType {
 }
 
 const port = parseInt(process.env.PORT || '3000', 10)
-const dev = process.env.NODE_ENV !== 'production'
-
 
 const server = http.createServer((req, res) => {
 
@@ -36,27 +32,22 @@ const websocket = new WebSocket.Server({ server, clientTracking: true });
 let clients: ClientType[] = []
 const channels: ChannelType[] = []
 
-const pingInterval = 3000
+const pingInterval = 10000 // 10seg
 
 websocket.on('connection', (socket, req)=> {
 
+  addNewClient(socket, req)
+
   socket.on('error', console.error)
+
+  socket.on('close', () => handleClose)
 
   socket.on('message', (data) => handleMessage(socket, req, data))
 
-  clients.push({ key: req.headers['sec-websocket-key'], isAlived: true, client: socket})
-
 })
-
-
-
-
 
 // implement autenticate
 server.on('upgrade', (req, socket, head)=> {
-
-  console.log('connecting...', req.headers['sec-websocket-key'])
-
 
   // socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
   // socket.destroy();
@@ -68,44 +59,31 @@ server.on('upgrade', (req, socket, head)=> {
   //   websocket.emit('connection', event, req);
 
   // })
-
-  
-
   
 })
 
-
 const interval = setInterval(handleDisconnection, pingInterval);
 
-websocket.on('close', () => {
-
-  clearInterval(interval);
-
-});
-
-
-
-
-
-server.listen(port, ()=> console.log(`Server listening at http://localhost:${port} as ${ dev ? 'development' : process.env.NODE_ENV }`))
-
-
-
-
-
-
-
-
+server.listen(port, ()=> console.log(`Server listening at http://localhost:${port} as ${ process.env.NODE_ENV ? process.env.NODE_ENV : 'development' }`))
 
 // functions 
 
+// add client
+function addNewClient(socket: WebSocket, req: http.IncomingMessage,) {
+
+  clients.push({ key: req.headers['sec-websocket-key'], isAlived: true, client: socket})
+  console.log('clients connected: ', clients.length)
+
+}
+
+/// MESSAGE FORMAT
 function handleMessage(socket: WebSocket, req: http.IncomingMessage, data: any) {
 
   const PARSED = JSON.parse(data as any);
 
   const { event, payload, channel } = PARSED;
 
-  if(event == 'pong') return resetDisconnectTimer(socket)
+  // if(event == 'pong') return resetDisconnectTimer(socket)
 
   if(event == 'join' || event == 'leave') return joinOrLeaveChannel(socket, req, PARSED)
 
@@ -113,11 +91,23 @@ function handleMessage(socket: WebSocket, req: http.IncomingMessage, data: any) 
 
   message(socket, req, PARSED)
 
+  return
+
+}
+
+function message(socket: WebSocket, req: http.IncomingMessage, data: any) {
+
+  const { event, payload } = data
+
+  const STRINGIFIED = JSON.stringify({ event, payload })
+
+  socket.send(STRINGIFIED)
+
+  return
+
 }
 
 function channelMessage(socket: WebSocket, req: http.IncomingMessage, data: any) {
-
-  console.log('receiving message... ')
 
   const { event, payload, channel } = data
 
@@ -140,15 +130,7 @@ function channelMessage(socket: WebSocket, req: http.IncomingMessage, data: any)
 
   })
 
-}
-
-function message(socket: WebSocket, req: http.IncomingMessage, data: any) {
-
-  const { event, payload } = data
-
-  const STRINGIFIED = JSON.stringify({ event, payload })
-
-  socket.send(STRINGIFIED)
+  return
 
 }
 
@@ -174,21 +156,14 @@ function joinOrLeaveChannel(socket: WebSocket, req: http.IncomingMessage, data: 
 
 }
 
+/// HANDLE CLOSE
+function handleClose(socket: WebSocket, code: number, reason: Buffer) {
+
+  clients = clients.filter((c)=> c.client !== socket)
+
+}
+
 function handleDisconnection() {
-
-  // secure method to handler disconnect
-  
-  // const STRINGIFIED_PING = JSON.stringify({ event: 'ping', payload: null })
-
-  // clients.forEach(c => {
-
-  //   if(!c.isAlived) return disconnectThis(c)
-
-  //   c.isAlived = false
-
-  //   c.client.send(STRINGIFIED_PING)
-
-  // })
 
   const connectedClients = [];
 
@@ -201,29 +176,5 @@ function handleDisconnection() {
   });
   
   clients = connectedClients;
-
-}
-
-function resetDisconnectTimer(socket: WebSocket) {
-
-  const foundClient = clients.find((c)=> c.client == socket)
-    
-  if(!foundClient) return;
-  
-  foundClient.isAlived = true
-
-}
-
-function disconnectThis(c: ClientType) {
-  
-  setTimeout(()=> {
-
-    if(c.isAlived) return
-    
-    c.client.terminate()
-
-    clients = clients.filter(e => e.key !== c.key)
-
-  }, pingInterval * 2)
 
 }
