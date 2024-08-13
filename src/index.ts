@@ -3,6 +3,17 @@ import { parse } from 'url'
 import { WebSocketServer } from 'ws';
 import WebSocket from 'ws';
 import crypto from 'crypto'
+import internal from 'stream';
+
+interface ClientType { 
+  key: any, 
+  isAlived: boolean,
+  client: WebSocket,
+}
+interface ChannelType { 
+  name: string, 
+  clients: WebSocket[]
+}
 
 const port = parseInt(process.env.PORT || '3000', 10)
 const dev = process.env.NODE_ENV !== 'production'
@@ -17,54 +28,26 @@ const server = http.createServer((req, res) => {
 // const websocket = new WebSocketServer({ server, clientTracking: true });
 const websocket = new WebSocket.Server({ server, clientTracking: true });
 
-const clients = []
-const channels: { name: string; clients: any[] }[] = []
+
+
+
+
+
+let clients: ClientType[] = []
+const channels: ChannelType[] = []
+
+const pingInterval = 3000
 
 websocket.on('connection', (socket, req)=> {
 
-  // socket.isAlive = true;
-
   socket.on('error', console.error)
 
-  socket.on('pong', (socket) => {
+  socket.on('message', (data) => handleMessage(socket, req, data))
 
-    // console.log(socket.)
-
-  });
-
-  socket.on('message', (data) => {
-
-    const PARSED = JSON.parse(data as any);
-
-    const { event, payload, channel } = PARSED;
-
-    console.log('receiving message... ', channel)
-
-    if(event == 'join' || event == 'leave') return joinOrLeaveChannel(socket, req, PARSED)
-
-    if(channel) return handleChannelMessage(socket, req, PARSED)
-
-    // handleMessage(socket, req, PARSED)
-
-    // websocket.clients.forEach(client => {
-
-    //   // send event to all client, excluding itself
-    //   if(client == socket || client.readyState != WebSocket.OPEN) return
-
-    //   client.send(JSON.stringify({event, payload}))
-
-    // })
-
-    // socket.send(JSON.stringify({event, payload}))
-
-
-  
-  })
-
-  // console.log('connecting...! id:', req.headers['sec-websocket-key']);
-  socket.send(JSON.stringify({event: 'authenticated', payload: { ...req.headers } }))
+  clients.push({ key: req.headers['sec-websocket-key'], isAlived: true, client: socket})
 
 })
+
 
 
 
@@ -74,7 +57,6 @@ server.on('upgrade', (req, socket, head)=> {
 
   console.log('connecting...', req.headers['sec-websocket-key'])
 
-  socket.on('error', onSocketError);
 
   // socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
   // socket.destroy();
@@ -87,12 +69,13 @@ server.on('upgrade', (req, socket, head)=> {
 
   // })
 
-  socket.removeListener('error', onSocketError);
+  
+
   
 })
 
 
-
+const interval = setInterval(handleDisconnection, pingInterval);
 
 websocket.on('close', () => {
 
@@ -116,7 +99,25 @@ server.listen(port, ()=> console.log(`Server listening at http://localhost:${por
 
 // functions 
 
-function handleChannelMessage(socket: WebSocket, req: http.IncomingMessage, data: any) {
+function handleMessage(socket: WebSocket, req: http.IncomingMessage, data: any) {
+
+  const PARSED = JSON.parse(data as any);
+
+  const { event, payload, channel } = PARSED;
+
+  if(event == 'pong') return resetDisconnectTimer(socket)
+
+  if(event == 'join' || event == 'leave') return joinOrLeaveChannel(socket, req, PARSED)
+
+  if(channel) return channelMessage(socket, req, PARSED)
+
+  message(socket, req, PARSED)
+
+}
+
+function channelMessage(socket: WebSocket, req: http.IncomingMessage, data: any) {
+
+  console.log('receiving message... ')
 
   const { event, payload, channel } = data
 
@@ -141,9 +142,14 @@ function handleChannelMessage(socket: WebSocket, req: http.IncomingMessage, data
 
 }
 
-function handleMessage(socket: WebSocket, req: http.IncomingMessage, data: any) {
+function message(socket: WebSocket, req: http.IncomingMessage, data: any) {
 
-  console.log('message')
+  const { event, payload } = data
+
+  const STRINGIFIED = JSON.stringify({ event, payload })
+
+  socket.send(STRINGIFIED)
+
 }
 
 function joinOrLeaveChannel(socket: WebSocket, req: http.IncomingMessage, data: any) {
@@ -152,7 +158,6 @@ function joinOrLeaveChannel(socket: WebSocket, req: http.IncomingMessage, data: 
 
   if(data.event == 'leave' && channel) {
 
-    // channel.clients = channel.clients.filter(c => c !== req.headers['sec-websocket-key'])
     channel.clients = channel.clients.filter(c => c !== socket)
 
     console.log('channels: ', channels)
@@ -163,36 +168,62 @@ function joinOrLeaveChannel(socket: WebSocket, req: http.IncomingMessage, data: 
 
   if(!channel) return channels.push({ name: data.payload.channel, clients: [ socket ] })
   
-  // channel.clients = [ ...channel.clients.filter(c => c !== req.headers['sec-websocket-key']), req.headers['sec-websocket-key'] ] 
   channel.clients = [ ...channel.clients.filter(c => c !== socket), socket ] 
 
   console.log('channels: ', channels)
 
 }
 
+function handleDisconnection() {
 
+  // secure method to handler disconnect
+  
+  // const STRINGIFIED_PING = JSON.stringify({ event: 'ping', payload: null })
 
+  // clients.forEach(c => {
 
-const interval = setInterval(() => {
+  //   if(!c.isAlived) return disconnectThis(c)
 
-  websocket.clients.forEach(function each(socket) {
-    // if (ws.isAlive === false) return ws.terminate();
+  //   c.isAlived = false
 
-    // ws.isAlive = false;
-    socket.ping();
+  //   c.client.send(STRINGIFIED_PING)
+
+  // })
+
+  const connectedClients = [];
+
+  websocket.clients.forEach(socket => {
+
+    const client = clients.find(c => c.client === socket);
+
+    if(client) connectedClients.push(client);
 
   });
-
-}, 500);
-
-function onSocketError(error: any) {
-
-  console.log('error: ', error.message)
+  
+  clients = connectedClients;
 
 }
 
-function heartbeat(e: any) {
+function resetDisconnectTimer(socket: WebSocket) {
 
-  console.log('heartbeat: ', e)
+  const foundClient = clients.find((c)=> c.client == socket)
+    
+  if(!foundClient) return;
+  
+  foundClient.isAlived = true
+
+}
+
+function disconnectThis(c: ClientType) {
+  
+  setTimeout(()=> {
+
+    if(c.isAlived) return
+    
+    c.client.terminate()
+
+    clients = clients.filter(e => e.key !== c.key)
+
+  }, pingInterval * 2)
 
 }
