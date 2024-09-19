@@ -1,20 +1,24 @@
 {
   "name": "socket",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
-    "build": "rimraf ./dist && tsc",
-    "start": "npm run build && node dist/index.js",
+    "dev": "nodemon --env-file=.env src/server.ts",
+    "build": "rimraf ./build && tsc",
+    "start": "npm run build && node ./build/server.js",
     "postinstall": ""
   },
   "dependencies": {
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.0",
     "ts-node": "^10.9.2",
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
+    "@types/pg": "^8.11.10",
     "@types/ws": "^8.5.12",
     "nodemon": "^3.1.4",
     "rimraf": "^6.0.1",

@@ -4,7 +4,7 @@ FROM node:20-alpine as development
 
 # RUN apk add --no-cache libc6-compat
 
-WORKDIR /usr/app
+WORKDIR /app
 
 COPY package*.json ./
 
@@ -20,7 +20,7 @@ RUN npm run build
 EXPOSE 3000
 
 # CMD node index.js
-CMD ["node", "dist/index.js"]
+CMD ["node", "--env-file=.env", "build/server.js"]
 
 
 

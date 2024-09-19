@@ -1,5 +1,6 @@
 {
   "watch": ["src/**/*"],
-  "exec": "ts-node --project tsconfig.json ./src/index.ts",
+  "exec": "nodemon --exec node -r ts-node/register --env-file=.env ./src/server.ts",
   "ext": "js ts"
 }
+
