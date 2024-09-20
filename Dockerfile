@@ -20,7 +20,7 @@ RUN npm run build
 EXPOSE 3000
 
 # CMD node index.js
-CMD ["node", "--env-file=.env", "build/server.js"]
+CMD ["node", "--env-file=.env", "./build/server.js"]
 
 
 

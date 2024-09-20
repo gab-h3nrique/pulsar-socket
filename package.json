@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon --env-file=.env src/server.ts",
     "build": "rimraf ./build && tsc",
-    "start": "npm run build && node ./build/server.js",
+    "start": "npm run build && node --env-file=.env ./build/server.js",
     "postinstall": ""
   },
   "dependencies": {
