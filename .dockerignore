@@ -4,6 +4,8 @@ node_modules
 node_modules/
 dist/
 dist
+build
+build/
 npm-debug.log
 README.md
 .git
