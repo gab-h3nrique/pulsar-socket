@@ -66,10 +66,12 @@ async function addNewClient(socket: WebSocket, req: http.IncomingMessage) {
 
   if(!pool) return pools.push({ id: id,  channels: [], clients: [ client ] })
   
-  pool.clients = [ ...pool.clients.filter(c => c.socket !== client.socket), client ] 
+  pool.clients = [ ...pool.clients.filter(c => c.key !== client.key), client ] 
+
+  // console.log('client: ', client.key)
+  // console.log('pool: ', pool?.clients.map(e => e.key))
 
   console.log(`pools: ${pools.length}, channels: ${pools.reduce((a, b) => a + b.channels.length, 0)}, clients: ${pools.reduce((a, b) => a + b.clients.length, 0)}`)
-
 
 }
 //
@@ -254,6 +256,8 @@ function joinOrLeaveChannel(socket: WebSocket, req: http.IncomingMessage, data: 
 //
 /////// removing client
 function handleClose(socket: WebSocket, req: http.IncomingMessage) {
+
+  console.log('client disconnected')
 
   // getting pool's id from url
   const id = req.url.replace('/pool/', '').split('-')[1]
