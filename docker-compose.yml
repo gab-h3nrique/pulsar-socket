@@ -15,4 +15,4 @@ services:
       PORT: 3001
       ACCESS_TOKEN: g4rren-dansukdfrang
       POOL_TOKEN: g4rren-sdffg
-      DATABASE_URL: postgresql://postgres:pulsar-db-ps@127.0.0.1:5432/postgres?schema=postgres
+      DATABASE_URL: postgresql://postgres:pulsar-db-ps@0.0.0.0:5432/postgres?schema=postgres
