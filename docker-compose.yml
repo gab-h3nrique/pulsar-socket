@@ -7,7 +7,7 @@ services:
     container_name: pulsar-socket
     restart: always
     volumes:
-      - .:/app
+      - .:/src
     ports:
      - "3001:3001"
     # comand: npm run start
