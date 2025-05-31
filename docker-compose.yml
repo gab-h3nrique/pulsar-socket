@@ -21,4 +21,5 @@ services:
 
 networks:
   my-network:
-    external: true
+    # external: true
+    driver: bridge
