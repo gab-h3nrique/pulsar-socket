@@ -4,9 +4,9 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --env-file=.env src/server.ts",
-    "prisma": "npx prisma generate",
     "build": "rm -rf ./dist/ && npx tsc --project tsconfig.json",
-    "start": "node --env-file=.env ./dist/server.js"
+    "start": "node --env-file=.env ./dist/server.js",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
@@ -21,10 +21,13 @@
     "@types/node": "^20",
     "@types/pg": "^8.11.10",
     "@types/ws": "^8.5.12",
+    "autoprefixer": "^10.4.21",
     "nodemon": "^3.1.4",
     "prisma": "^6.14.0",
-    "rimraf": "^6.0.1",
     "typescript": "^5.5.4"
+  },
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
   },
   "author": "",
   "license": "ISC",
