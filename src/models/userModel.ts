@@ -1,5 +1,5 @@
 
-import prisma from "./../database"
+import prisma from "../database/prisma";
 import { UserType } from "../types/userType"
 
 function model() {

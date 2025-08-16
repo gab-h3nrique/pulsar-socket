@@ -9,6 +9,6 @@
     // "strict": true,
     // "esModuleInterop": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/database"],
   "exclude": ["node_modules", "dist"]
 }

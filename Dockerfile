@@ -60,12 +60,13 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat
 COPY package*.json ./
 COPY tsconfig.json .env* ./
+COPY prisma ./prisma
+RUN npx prisma generate
 RUN npm ci
 COPY . .
-RUN npm run prisma
+
 RUN npm run build
 
-# ENV HOSTNAME "0.0.0.0"
 EXPOSE 3000
 
 CMD ["node", "--env-file=.env", "dist/server.js"]

@@ -1,4 +1,4 @@
-import prisma from "./../database"
+import prisma from "../database/prisma";
 import { PoolType } from "../types/poolType"
 
 function model() {
