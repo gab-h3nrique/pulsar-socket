@@ -1,14 +1,16 @@
 {
   "name": "socket",
   "version": "1.0.0",
-  "main": "dist/server.js",  
+  "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --env-file=.env src/server.ts",
+    "prisma": "npx prisma generate",
     "build": "rm -rf ./dist/ && npx tsc --project tsconfig.json",
     "start": "node --env-file=.env ./dist/server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "@prisma/client": "^6.14.0",
+    "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.0",
     "ts-node": "^10.9.2",
@@ -20,6 +22,7 @@
     "@types/pg": "^8.11.10",
     "@types/ws": "^8.5.12",
     "nodemon": "^3.1.4",
+    "prisma": "^6.14.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.5.4"
   },

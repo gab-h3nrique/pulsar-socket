@@ -53,16 +53,16 @@
 
 
 
-FROM node:20-alpine as deps
+FROM node:lts-alpine as deps
 
 # Install dependencies only when needed
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 COPY package*.json ./
 COPY tsconfig.json .env* ./
-RUN npm install
+RUN npm ci
 COPY . .
-
+RUN npm run prisma
 RUN npm run build
 
 # ENV HOSTNAME "0.0.0.0"

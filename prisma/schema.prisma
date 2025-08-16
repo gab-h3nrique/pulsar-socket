@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Users {
+  id                String @id @default(cuid())
+
+  name              String
+  email             String @unique
+  password          String
+  role              Int // 100 = adm // 200 = supervisor // 300 teammate
+  
+  poolUsers         PoolUsers[] @relation("Users")
+  
+  createdAt         DateTime? @default(now())
+  updatedAt         DateTime? @updatedAt
+
+  @@map("users")
+}
+
+model PoolUsers {
+  id                Int @id @default(autoincrement())
+
+  user              Users @relation("Users", fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+
+  pool              Pools @relation("Pools", fields: [poolId], references: [id], onDelete: Cascade)
+  poolId            String
+
+  role              String
+
+  createdAt         DateTime? @default(now())
+  updatedAt         DateTime? @updatedAt
+
+  @@map("poolUsers")
+}
+
+model Pools {
+  id                String @id @default(cuid())
+
+  name              String
+
+  token             String
+
+  users             PoolUsers[] @relation("Pools")
+
+  createdAt         DateTime? @default(now())
+  updatedAt         DateTime? @updatedAt
+
+  @@map("pools")
+}
+
+model Settings {
+  id        Int  @id @default(autoincrement())
+
+  name      String //  maxInstallments
+  value     String? //  12x
+  jsonValue Json? //  { 'maxInstallments' : 12, 'minInstallments': 4}
+
+  @@map("settings")
+}
+
+model Fails {
+  id        Int @id @default(autoincrement())
+
+  type      String @default("runtime") // api, docker, git, runtime
+
+  name      String @default("UnknownError") // the error name
+  message   String? // the error message
+  data      Json? // the data object
+  error     Json? // the error object
+  status    String? @default("new") // new, resolved, solved
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@map("fails")
+}
