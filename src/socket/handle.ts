@@ -406,19 +406,10 @@ function factory() {
     `);
 
     
-    // // if already has logs, move cursor up and clear
-    // if (previousLogLines > 0) {
-    //   process.stdout.write(`\x1b[${previousLogLines}A`)
-    //   process.stdout.write(`\x1b[0J`)
-    // }
+    process.stdout.write(`\x1b[H\x1b[2J`); // cursor home + clear screen
+    process.stdout.write(log);
 
-    // // who new log
-    // process.stdout.write(log)
-
-    // // update line count
-    // previousLogLines = log.split("\n").length
-
-    console.log(log)
+    // console.log(log)
   }
   // function logs() {
   //   console.clear()
@@ -427,7 +418,7 @@ function factory() {
   /**
   *
   */
-  setInterval(logs, 1000)
+  setInterval(logs, 5000)
   /**
   * 
   * 
