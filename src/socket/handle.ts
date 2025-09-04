@@ -424,7 +424,7 @@ function factory() {
   /**
   *
   */
-  // setInterval(logs, 1000)
+  setInterval(logs, 1000)
   /**
   * 
   * 
