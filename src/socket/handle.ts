@@ -383,6 +383,7 @@ function factory() {
     const cpuLoad = os.loadavg()[0]
     const cpuPercent = ((cpuLoad / os.cpus().length) * 100).toFixed(1);
     const now = new Date().toLocaleString()
+    const PORT = parseInt(process.env.PORT || '3000', 10)
     
     console.clear()
 
@@ -399,6 +400,8 @@ function factory() {
 
 ⚡ \x1b[33mCPU Usage:\x1b[0m         ${cpuPercent}%
 🧠 \x1b[33mMemory Used:\x1b[0m       ${Format.bytes(usedMem)} / ${Format.bytes(freeMem)}
+
+\x1b[36m✅ Running on\x1b[0m ws://localhost:${PORT} \x1b[36mor\x1b[0m http://localhost:${PORT}
 \x1b[32m───────────────────────────────────\x1b[0m
     `);
 
