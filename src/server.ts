@@ -101,9 +101,7 @@ const SERVER = net.createServer((socket) => {
     // ---------------- WebSocket handshake ----------------
     // detect if the connection is a WebSocket upgrade request
     if(str.startsWith('GET') && str.includes('Upgrade: websocket')) {
-
       // log that a WebSocket client connected
-      console.log('WebSocket connection detected')
 
       // execute the custom handshake for your WebSocket auth
       Auth.handshake(socket, data)

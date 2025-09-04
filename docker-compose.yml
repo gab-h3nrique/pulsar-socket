@@ -1,7 +1,6 @@
 
 services:
 
-  # socket service
   socket:
     build: "./"
     container_name: pulsar-socket
@@ -10,17 +9,15 @@ services:
       - .:/src
     ports:
      - "3001:3001"
-     - "3002:3002"
-#     networks:
-#       - my-network
-#     # comand: npm run start
-#     environment:
-#       PORT: 3001
-#       ACCESS_TOKEN: g4rren-dansukdfrang
-#       POOL_TOKEN: g4rren-sdffg
-#       DATABASE_URL: postgresql://postgres:pulsar-db-ps@db:5432/postgres?schema=postgres
 
-# networks:
-#   my-network:
-#     # external: true
-#     driver: bridge
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: pulsar-nginx
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/conf.d:/etc/nginx/conf.d
+  #   depends_on:
+  #     - socket

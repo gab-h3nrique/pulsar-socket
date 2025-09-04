@@ -394,12 +394,12 @@ function factory() {
 📡 \x1b[33mActive Pools:\x1b[0m      ${0}
 👥 \x1b[33mConnected Clients:\x1b[0m ${CLIENTS.length}
 💬 \x1b[33mMessages Sent:\x1b[0m     ${COUNT_MESSAGE}
-🕒 \x1b[33mUptime:\x1b[0m            ${process.uptime().toFixed(0)}
 
 \x1b[36m📊 System Info\x1b[0m
 
 ⚡ \x1b[33mCPU Usage:\x1b[0m         ${cpuPercent}%
 🧠 \x1b[33mMemory Used:\x1b[0m       ${Format.bytes(usedMem)} / ${Format.bytes(freeMem)}
+🕒 \x1b[33mUptime:\x1b[0m            ${Format.upTime(process.uptime().toFixed(0))}
 
 \x1b[36m✅ Running on\x1b[0m ws://localhost:${PORT} \x1b[36mor\x1b[0m http://localhost:${PORT}
 \x1b[32m───────────────────────────────────\x1b[0m

@@ -77,7 +77,9 @@ function factory() {
 
             const hrs = Math.floor(ms / 3600000)
 
-            return `${hrs}h ${min}m ${sec}s`
+            const days = Math.floor(hrs / 24)
+
+            return `${days} day(s) ${hrs} hour(s) ${min} minute(s)`
 
         },
 
